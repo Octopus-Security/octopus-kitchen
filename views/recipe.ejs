@@ -49,6 +49,20 @@
     <ol class="steps">
       <% steps.forEach(function (s) { %><li><%= s.replace(/^\d+\.\s*/, '') %></li><% }); %>
     </ol>
+
+    <% if (hasAffiliate && tools && tools.length) { %>
+      <aside class="tools-box">
+        <h2>🛒 Equipment for this recipe</h2>
+        <ul>
+          <% tools.forEach(function (t) { %>
+            <li>
+              <a href="<%= amazonSearch(t.term) %>" target="_blank" rel="sponsored nofollow noopener"><%= t.label %></a>
+              <span class="note"><%= t.note %></span>
+            </li>
+          <% }); %>
+        </ul>
+      </aside>
+    <% } %>
   </article>
 
   <script type="application/ld+json">

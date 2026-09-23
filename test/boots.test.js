@@ -22,3 +22,12 @@ test('safe-temp matcher surfaces the right temps', () => {
   assert.ok(!broth.some((t) => t.food.startsWith('Poultry')), 'chicken broth is not poultry');
   assert.ok(broth.some((t) => t.tempF === 160), 'ground beef → 160°F');
 });
+
+test('equipment matcher suggests relevant tools', () => {
+  const { relevantTools } = require('../kitchen-tools');
+  const friedRice = relevantTools({ title: 'Chicken fried rice', tags: 'rice,stir-fry', ingredients: [{ name: 'chicken thigh' }] });
+  const labels = friedRice.map((t) => t.label);
+  assert.ok(labels.some((l) => /wok/i.test(l)), 'fried rice → wok');
+  assert.ok(labels.some((l) => /thermometer/i.test(l)), 'chicken → thermometer');
+  assert.strictEqual(relevantTools({ title: 'Garlic sesame noodles', ingredients: [{ name: 'soy sauce' }] }).some((t) => /thermometer/i.test(t.label)), false, 'no protein → no thermometer');
+});

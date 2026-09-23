@@ -49,6 +49,13 @@ button.mini:hover, .quick-timers button:hover { border-color: var(--accent); col
 .temp-callout .note { display: block; color: var(--muted); font-size: 0.85rem; }
 .small-link { display: inline-block; margin-top: 8px; font-size: 0.85rem; }
 
+.tools-box { background: #14171c; border: 1px solid var(--border); border-left: 3px solid #6f8cff;
+  border-radius: 10px; padding: 14px 18px; margin: 24px 0; }
+.tools-box h2 { font-size: 1.05rem; margin: 0 0 8px; }
+.tools-box ul { margin: 0; padding-left: 18px; }
+.tools-box li { margin: 7px 0; }
+.tools-box .note { display: block; color: var(--muted); font-size: 0.85rem; }
+
 .ingredients { list-style: none; padding: 0; }
 .ingredients li { display: flex; align-items: baseline; gap: 10px; padding: 5px 0; border-bottom: 1px solid var(--border); }
 .ingredients .qty { color: var(--muted); min-width: 92px; font-variant-numeric: tabular-nums; }

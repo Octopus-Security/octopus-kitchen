@@ -8,6 +8,7 @@ const { createSSOMiddleware } = require('@octopus-security/auth-client');
 const { BUILD, STARTED_AT, asset } = require('./build');
 const { Recipe, initDatabase } = require('./database');
 const { allTemps, relevantTemps } = require('./safe-temps');
+const { relevantTools } = require('./kitchen-tools');
 const { withTag, amazonSearch, AMAZON_TAG } = require('./amazon');
 const {
   ownerOf, publicWhere, visibleWhere, ownedWhere, canView, canEdit,
@@ -129,6 +130,7 @@ app.get('/recipes/:id', async (req, res, next) => {
     ingredients,
     steps: (r.instructions || '').split('\n').filter(Boolean),
     temps: relevantTemps(r),
+    tools: relevantTools(r),
     canEdit: canEdit(req, r),
   });
 });
@@ -139,6 +141,27 @@ app.get('/temps', (req, res) => {
 
 app.get('/timers', (req, res) => {
   res.render('timers', { title: 'Kitchen timers' });
+});
+
+// ── SEO: robots + a sitemap of the public recipes (food.octo storefront) ─────
+app.get('/robots.txt', (req, res) => {
+  res.type('text/plain').send(`User-agent: *\nAllow: /\nSitemap: https://${PUBLIC_HOST}/sitemap.xml\n`);
+});
+
+app.get('/sitemap.xml', async (req, res) => {
+  const recipes = await Recipe.findAll({ where: publicWhere(), attributes: ['id', 'updatedAt'], order: [['id', 'ASC']] });
+  const base = `https://${PUBLIC_HOST}`;
+  const esc = (s) => String(s).replace(/&/g, '&amp;');
+  const staticUrls = ['/', '/recipes', '/temps', '/timers'];
+  const urls = [
+    ...staticUrls.map((u) => ({ loc: base + u })),
+    ...recipes.map((r) => ({ loc: `${base}/recipes/${r.id}`, lastmod: r.updatedAt && new Date(r.updatedAt).toISOString().slice(0, 10) })),
+  ];
+  const xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
+    + '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    + urls.map((u) => `  <url><loc>${esc(u.loc)}</loc>${u.lastmod ? `<lastmod>${u.lastmod}</lastmod>` : ''}</url>`).join('\n')
+    + '\n</urlset>\n';
+  res.type('application/xml').send(xml);
 });
 
 // ── Management (login required) ──────────────────────────────────────────────
