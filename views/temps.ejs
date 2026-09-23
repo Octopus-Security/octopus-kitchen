@@ -1,0 +1,26 @@
+<%- include('partials/head', { title, asset, metaDescription: 'USDA safe minimum internal cooking temperatures for chicken, beef, pork, fish, eggs and leftovers — in °F and °C.' }) %>
+<%- include('partials/nav', { user }) %>
+
+  <div class="hero-title">
+    <h1>Safe cooking temperatures</h1>
+    <p>USDA safe minimum internal temperatures. Use an instant-read thermometer in the thickest part, away from bone.</p>
+  </div>
+
+  <div class="table-wrap">
+    <table class="temps">
+      <thead><tr><th>Food</th><th>°F</th><th>°C</th><th>Rest</th><th>Notes</th></tr></thead>
+      <tbody>
+        <% temps.forEach(function (t) { %>
+          <tr>
+            <td><%= t.food %></td>
+            <td class="num"><strong><%= t.tempF %></strong></td>
+            <td class="num"><%= t.tempC %></td>
+            <td class="num"><%= t.restMin ? (t.restMin + ' min') : '—' %></td>
+            <td class="note"><%= t.note %></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+
+<%- include('partials/foot', { hasAffiliate }) %>

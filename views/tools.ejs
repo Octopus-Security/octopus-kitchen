@@ -1,0 +1,18 @@
+<%- include('partials/head', { title, asset }) %>
+<%- include('partials/nav', { user }) %>
+
+  <div class="hero-title">
+    <h1>Kitchen</h1>
+    <p>Recipes, reference and tools — <%= APP_HOST %> for the workshop, <%= PUBLIC_HOST %> for the public recipe book.</p>
+  </div>
+
+  <div class="cards">
+    <a class="card" href="/recipes"><h2>📖 Recipes</h2><p>The recipe book — browse, and manage what's public.</p></a>
+    <a class="card" href="/temps"><h2>🌡️ Safe temperatures</h2><p>USDA safe minimum internal cooking temps, at a glance.</p></a>
+    <a class="card" href="/timers"><h2>⏲️ Timers</h2><p>Run several kitchen timers at once.</p></a>
+    <% if (user) { %>
+      <a class="card" href="/my"><h2>🗂️ My recipes</h2><p>Your recipes — toggle any of them public or private.</p></a>
+    <% } %>
+  </div>
+
+<%- include('partials/foot', { hasAffiliate }) %>

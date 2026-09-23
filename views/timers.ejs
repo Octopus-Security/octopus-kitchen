@@ -1,0 +1,26 @@
+<%- include('partials/head', { title, asset, metaDescription: 'Run several kitchen timers at once — no app, no login.' }) %>
+<%- include('partials/nav', { user }) %>
+
+  <div class="hero-title">
+    <h1>Kitchen timers</h1>
+    <p>Run as many as you need at once. They beep and flash when done.</p>
+  </div>
+
+  <form id="new-timer" class="timer-form">
+    <input type="text" id="t-label" placeholder="Label (e.g. Rice)" maxlength="40" />
+    <input type="number" id="t-min" placeholder="min" min="0" max="600" inputmode="numeric" />
+    <input type="number" id="t-sec" placeholder="sec" min="0" max="59" inputmode="numeric" />
+    <button type="submit">Add timer</button>
+  </form>
+
+  <div class="quick-timers">
+    <button data-min="10" data-label="Boiled eggs">Eggs 10:00</button>
+    <button data-min="20" data-label="Rice">Rice 20:00</button>
+    <button data-min="25" data-label="Chicken thighs">Chicken 25:00</button>
+  </div>
+
+  <div id="timers" class="timers"></div>
+
+  <script src="<%= asset('/timers.js') %>" defer></script>
+
+<%- include('partials/foot', { hasAffiliate }) %>

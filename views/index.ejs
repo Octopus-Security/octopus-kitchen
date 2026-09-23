@@ -1,0 +1,26 @@
+<%- include('partials/head', { title, asset, metaDescription: 'Batch-cook and meal-prep recipes — high-protein, microwaveable, made to keep in the fridge.' }) %>
+<%- include('partials/nav', { user }) %>
+
+  <div class="hero-title">
+    <h1>Recipes</h1>
+    <p>Batch-cook, high-protein, made to keep — with the safe cooking temps built in.</p>
+  </div>
+
+  <% if (!recipes.length) { %>
+    <p class="muted">No recipes yet.</p>
+  <% } %>
+
+  <div class="cards">
+    <% recipes.forEach(function (r) { %>
+      <a class="card" href="/recipes/<%= r.id %>">
+        <h2><%= r.title %></h2>
+        <% if (r.summary) { %><p><%= r.summary %></p><% } %>
+        <div class="card-meta">
+          <% if (r.servings) { %><span><%= r.servings %> servings</span><% } %>
+          <% if (r.visibility === 'private') { %><span class="pill">private</span><% } %>
+        </div>
+      </a>
+    <% }); %>
+  </div>
+
+<%- include('partials/foot', { hasAffiliate }) %>

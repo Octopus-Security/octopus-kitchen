@@ -1,0 +1,16 @@
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="/">🍳 Octopus Kitchen</a>
+    <nav class="nav-links">
+      <a href="/recipes">Recipes</a>
+      <a href="/temps">Safe temps</a>
+      <a href="/timers">Timers</a>
+      <% if (user) { %>
+        <a href="/my">My recipes</a>
+      <% } else { %>
+        <a href="/login">Log in</a>
+      <% } %>
+    </nav>
+  </div>
+</header>
+<main class="wrap">

@@ -1,0 +1,68 @@
+<%- include('partials/head', { title, asset, metaDescription: (recipe.summary || (recipe.title + ' — ingredients, steps and safe cooking temperatures.')) }) %>
+<%- include('partials/nav', { user }) %>
+
+  <article class="recipe">
+    <h1><%= recipe.title %></h1>
+    <div class="recipe-meta">
+      <% if (recipe.servings) { %><span><%= recipe.servings %> servings</span><% } %>
+      <% if (recipe.keepsForDays) { %><span>keeps <%= recipe.keepsForDays %> days</span><% } %>
+      <% if (recipe.prepMinutes) { %><span>prep <%= recipe.prepMinutes %>m</span><% } %>
+      <% if (recipe.cookMinutes) { %><span>cook <%= recipe.cookMinutes %>m</span><% } %>
+      <% if (canEdit) { %>
+        <form method="post" action="/recipes/<%= recipe.id %>/visibility" class="inline">
+          <button type="submit" class="mini">
+            <%= recipe.visibility === 'public' ? 'Public — make private' : 'Private — make public' %>
+          </button>
+        </form>
+      <% } %>
+    </div>
+
+    <% if (temps.length) { %>
+      <aside class="temp-callout">
+        <h2>🌡️ Safe cooking temperatures</h2>
+        <ul>
+          <% temps.forEach(function (t) { %>
+            <li>
+              <strong><%= t.food %>:</strong> <%= t.tempF %>°F (<%= t.tempC %>°C)<% if (t.restMin) { %>, rest <%= t.restMin %> min<% } %>
+              <span class="note"><%= t.note %></span>
+            </li>
+          <% }); %>
+        </ul>
+        <a class="small-link" href="/temps">Full safe-temperature reference →</a>
+      </aside>
+    <% } %>
+
+    <h2>Ingredients</h2>
+    <ul class="ingredients">
+      <% ingredients.forEach(function (i) { %>
+        <li>
+          <span class="qty"><%= [i.quantity, i.unit].filter(Boolean).join(' ') %></span>
+          <span class="name"><%= i.name %></span>
+          <% if (hasAffiliate && i.name) { %>
+            <a class="shop" href="<%= amazonSearch(i.name) %>" target="_blank" rel="sponsored nofollow noopener">shop</a>
+          <% } %>
+        </li>
+      <% }); %>
+    </ul>
+
+    <h2>Method</h2>
+    <ol class="steps">
+      <% steps.forEach(function (s) { %><li><%= s.replace(/^\d+\.\s*/, '') %></li><% }); %>
+    </ol>
+  </article>
+
+  <script type="application/ld+json">
+  <%- JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'Recipe',
+    name: recipe.title,
+    description: recipe.summary || undefined,
+    recipeYield: recipe.servings ? (recipe.servings + ' servings') : undefined,
+    recipeIngredient: ingredients.map(function (i) { return [i.quantity, i.unit, i.name].filter(Boolean).join(' '); }),
+    recipeInstructions: steps.map(function (s) { return { '@type': 'HowToStep', text: s.replace(/^\d+\.\s*/, '') }; }),
+    keywords: recipe.tags || undefined,
+    author: { '@type': 'Person', name: 'Serpopard' }
+  }) %>
+  </script>
+
+<%- include('partials/foot', { hasAffiliate }) %>

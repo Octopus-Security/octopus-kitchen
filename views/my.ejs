@@ -1,0 +1,23 @@
+<%- include('partials/head', { title, asset }) %>
+<%- include('partials/nav', { user }) %>
+
+  <div class="hero-title">
+    <h1>My recipes</h1>
+    <p>Toggle any recipe between public (shows on <%= PUBLIC_HOST %>) and private.</p>
+  </div>
+
+  <% if (!recipes.length) { %><p class="muted">You have no recipes yet.</p><% } %>
+
+  <ul class="my-list">
+    <% recipes.forEach(function (r) { %>
+      <li>
+        <a href="/recipes/<%= r.id %>"><%= r.title %></a>
+        <span class="pill <%= r.visibility %>"><%= r.visibility %></span>
+        <form method="post" action="/recipes/<%= r.id %>/visibility" class="inline">
+          <button type="submit" class="mini"><%= r.visibility === 'public' ? 'Make private' : 'Make public' %></button>
+        </form>
+      </li>
+    <% }); %>
+  </ul>
+
+<%- include('partials/foot', { hasAffiliate }) %>
