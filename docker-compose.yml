@@ -1,0 +1,48 @@
+services:
+  octopus-kitchen:
+    build:
+      context: .
+      args:
+        # GitHub Packages token for @octopus-security/auth-client. A stack
+        # variable reaches the BUILD only if it is named here.
+        NPM_TOKEN: ${NPM_TOKEN}
+    container_name: octopus_kitchen_internal
+    restart: unless-stopped
+    environment:
+      - PORT=3014
+      - SESSION_SECRET=${SESSION_SECRET}
+      # Auth (SSO cookie verified remotely by octopus-auth). Login is OPTIONAL:
+      # the public storefront (food.octo) serves public recipes with no session;
+      # a session unlocks private recipes and management (kitchen.octo).
+      - AUTH_SERVICE_URL=${AUTH_SERVICE_URL:-http://octopus-auth:3002}
+      - AUTH_PUBLIC_URL=${AUTH_PUBLIC_URL:-https://auth.octopustechnology.net}
+      # Which host is the public storefront vs the management UI. Same app, two
+      # domains (the games pattern). Both have code defaults.
+      - PUBLIC_HOST=${PUBLIC_HOST:-food.octopustechnology.net}
+      - APP_HOST=${APP_HOST:-kitchen.octopustechnology.net}
+      # Who may claim recipes that predate ownership and see them meanwhile;
+      # who unattributed service writes belong to. See ownership notes.
+      - ADMIN_USERNAME=${ADMIN_USERNAME:-}
+      - SERVICE_DEFAULT_OWNER=${SERVICE_DEFAULT_OWNER:-}
+      # Service token cortex/Neith present to read/write recipes here (the same
+      # bridge shopper exposes today, repointed to kitchen).
+      - KITCHEN_SERVICE_TOKEN=${KITCHEN_SERVICE_TOKEN}
+      # Price checking stays in shopper (it holds the store API keys). Kitchen
+      # calls shopper's internal price endpoint with shopper's service token.
+      - SHOPPER_URL=${SHOPPER_URL:-http://octopus_shopper_internal:3004}
+      - SHOPPER_SERVICE_TOKEN=${SHOPPER_SERVICE_TOKEN:-}
+      # Amazon Associate tag for affiliate links on public recipe pages. Public
+      # by nature (rides in the link), not a secret.
+      - PUBLIC_AMAZON_ASSOCIATE_TAG=${PUBLIC_AMAZON_ASSOCIATE_TAG:-}
+      - DB_PATH=/app/data/kitchen.db
+    volumes:
+      - kitchen_data:/app/data
+    networks:
+      - octopus_network
+
+volumes:
+  kitchen_data:
+
+networks:
+  octopus_network:
+    external: true

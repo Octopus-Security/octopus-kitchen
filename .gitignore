@@ -1,0 +1,17 @@
+node_modules/
+
+# Environment / secrets (keep .env.example tracked)
+.env
+.env.local
+.env.*.local
+stack.env
+
+# Runtime data — the database is created and seeded at boot, never committed.
+data/
+
+# Logs / build output / OS cruft
+*.log
+npm-debug.log*
+dist/
+build/
+.DS_Store
