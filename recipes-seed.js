@@ -817,6 +817,87 @@ const RECIPES = [
     ].join('\n'),
   },
 
+  // ══════════════════════════════════════════════════════════════════════════
+  // CHEESECAKE
+  // ══════════════════════════════════════════════════════════════════════════
+
+  {
+    title: 'Turtle cheesecake with brown sugar pecan shortbread crust',
+    servings: 12, keepsForDays: 5,
+    prepMinutes: 90, cookMinutes: 110,
+    tags: 'baking,dessert,sweet,cheesecake,caramel,chocolate,pecan,make-ahead',
+    ingredients: [
+      // Crust
+      ing('unsalted butter, softened (crust)', '¾', 'cup (1½ sticks)'),
+      ing('packed brown sugar (crust)', 1, 'cup'),
+      ing('vanilla extract (crust)', '1½', 'tsp'),
+      ing('all-purpose flour (crust)', '2¼', 'cups'),
+      ing('salt (crust)', '¼', 'tsp'),
+      ing('pecan chips (crust)', '¼', 'cup'),
+      // Caramel
+      ing('granulated sugar (caramel)', 2, 'cups'),
+      ing('unsalted butter, room temperature (caramel)', '½', 'cup (1 stick)'),
+      ing('heavy whipping cream, room temperature (caramel)', 1, 'cup'),
+      ing('all-purpose flour (caramel layer)', 5, 'tbsp'),
+      ing('pecan chips (caramel layer)', '¼', 'cup'),
+      // Ganache
+      ing('semi-sweet chocolate chips (ganache)', 6, 'oz (~1 cup)'),
+      ing('heavy whipping cream (ganache)', 6, 'tbsp'),
+      // Filling
+      ing('cream cheese, room temperature', 24, 'oz (three 8-oz packages)'),
+      ing('packed brown sugar (filling)', 1, 'cup'),
+      ing('all-purpose flour (filling)', 3, 'tbsp'),
+      ing('sour cream, room temperature', 1, 'cup'),
+      ing('vanilla extract (filling)', '1½', 'tsp'),
+      ing('large eggs, room temperature', 3, 'eggs'),
+      // Topping
+      ing('semi-sweet chocolate chips (drizzle)', 2, 'oz (~⅓ cup)'),
+      ing('heavy whipping cream (drizzle)', 3, 'tbsp'),
+      ing('pecan chips (topping)', '¼', 'cup'),
+    ],
+    instructions: [
+      'Yield 12-14 slices. Total time ~9 hours including oven cooling and chilling. Buy: 1 pint heavy cream (1 9/16 cups used), 2¾ cups flour, 2 cups packed brown sugar, 8 oz chocolate chips, ¾ cup pecan chips. Equipment: 9-inch springform pan, parchment, heavy-duty foil, large roasting pan (water bath), electric mixer.',
+      '',
+      'STEP 1: BROWN SUGAR PECAN SHORTBREAD CRUST',
+      '1. Preheat the oven to 350°F (177°C). Lightly grease the sides of a 9-inch springform pan and line the bottom with a parchment round.',
+      '2. Beat the ¾ cup softened butter and 1 cup brown sugar on medium-high until completely smooth and creamy. Beat in 1½ tsp vanilla.',
+      '3. Add 2¼ cups flour and ¼ tsp salt and beat on low just until incorporated. Fold in ¼ cup pecan chips. If crumbly, squeeze and knead it together by hand into a cohesive dough.',
+      '4. Press evenly into the bottom and about 1 inch up the sides of the pan. Prick the bottom all over with a fork so it does not puff.',
+      '5. Bake 15-18 minutes, until set and lightly golden at the edges. Cool completely. Lower the oven to 300°F (148°C).',
+      '',
+      'STEP 2: HOMEMADE CARAMEL SAUCE',
+      '6. Have the butter and cream at room temperature (or slightly warmed) so the caramel does not seize.',
+      '7. Spread 2 cups granulated sugar in an even layer in a large saucepan over medium-high heat. Whisk continuously — it clumps first, then melts into an amber liquid (~10 minutes).',
+      '8. Once melted, stop whisking and cook just until a slightly darker amber that smells nutty. Remove from the heat immediately.',
+      '9. Whisk in ½ cup butter (it will bubble vigorously), then slowly pour in 1 cup cream, whisking until smooth.',
+      '10. Set aside 1 cup of the plain caramel at room temperature for the topping. Whisk 5 tbsp flour and ¼ cup pecan chips into the rest in the pan until smooth. Set aside.',
+      '',
+      'STEP 3: CHOCOLATE GANACHE LAYER',
+      '11. Put 6 oz chocolate chips in a small heat-safe bowl. Heat 6 tbsp cream just to a boil and pour it over. Let sit undisturbed 2-3 minutes, then whisk gently until smooth and glossy.',
+      '',
+      'STEP 4: CREAM CHEESE FILLING',
+      '12. Keep the mixer on LOW throughout — excess air causes surface cracks.',
+      '13. Beat 24 oz cream cheese, 1 cup brown sugar and 3 tbsp flour until completely smooth. Scrape down the sides and bottom.',
+      '14. Add 1 cup sour cream and 1½ tsp vanilla and beat until well combined.',
+      '15. Add the 3 eggs one at a time, mixing just until combined after each. Do not overmix. Scrape down as needed.',
+      '',
+      'STEP 5: ASSEMBLY & WATER BATH',
+      '16. Wrap the outside bottom and sides of the springform pan tightly in 2-3 layers of heavy-duty foil so no water leaks in.',
+      '17. Spread the thickened caramel-pecan sauce over the cooled crust. Spread the ganache over the caramel. Gently pour or spoon the batter over the chocolate and smooth the top.',
+      '18. Set the pan in a large roasting pan on the middle rack of the 300°F (148°C) oven. Pour hot water into the roasting pan to halfway up the sides of the springform.',
+      '19. Bake 1 hour 35 minutes — the edges set, the centre 2-3 inches still slightly jiggly.',
+      '20. Turn the oven off and leave the door closed 30 minutes. Crack the door about an inch and leave it another 30 minutes.',
+      '21. Remove from the oven and water bath and peel off the foil. Spread about ½ cup of the reserved plain caramel over the warm cheesecake (microwave the caramel 10 seconds if too firm).',
+      '22. Refrigerate uncovered or loosely covered at least 5-6 hours (or overnight) until completely cool and firm.',
+      '',
+      'STEP 6: FINAL TOPPING & SERVING',
+      '23. Run a thin paring knife around the inside edge, unlock and remove the ring, and transfer to a platter.',
+      '24. Put 2 oz chocolate chips in a small bowl. Heat 3 tbsp cream to a boil, pour over, let sit 3 minutes, then whisk smooth.',
+      '25. Drizzle the remaining plain caramel and the chocolate sauce over the chilled cheesecake and sprinkle with the last ¼ cup pecan chips.',
+      'For clean slices, wipe the knife with a warm, damp cloth between cuts. Keep leftovers refrigerated up to 5 days.',
+    ],
+  },
+
 ];
 
 // ── Seed function ─────────────────────────────────────────────────────────────
@@ -840,6 +921,8 @@ async function seedDefaultRecipes(Recipe) {
         // than making every recipe remember which shape it is.
         instructions: Array.isArray(r.instructions) ? r.instructions.join('\n') : r.instructions,
         keepsForDays: r.keepsForDays,
+        prepMinutes: r.prepMinutes ?? null,
+        cookMinutes: r.cookMinutes ?? null,
         tags: r.tags,
         source: 'seed',
         owner,
