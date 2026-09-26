@@ -10,6 +10,7 @@ const { Recipe, initDatabase } = require('./database');
 const { allTemps, relevantTemps } = require('./safe-temps');
 const { relevantTools } = require('./kitchen-tools');
 const { withTag, amazonSearch, AMAZON_TAG } = require('./amazon');
+const { recipeToText, recipeFilename, parseIngredients } = require('./recipe-text');
 const {
   ownerOf, publicWhere, visibleWhere, ownedWhere, canView, canEdit,
 } = require('./ownership');
@@ -94,11 +95,6 @@ function requireServiceToken(req, res, next) {
 }
 
 // ── Recipe presentation ────────────────────────────────────────────────────────
-function parseIngredients(recipe) {
-  let ings = recipe.ingredients;
-  if (typeof ings === 'string') { try { ings = JSON.parse(ings); } catch { ings = []; } }
-  return Array.isArray(ings) ? ings : [];
-}
 function recipeCard(r) {
   return {
     id: r.id, title: r.title, servings: r.servings, tags: r.tags,
@@ -120,7 +116,19 @@ app.get('/recipes', async (req, res) => {
   res.render('index', { title: 'Recipes', recipes: recipes.map(recipeCard) });
 });
 
-app.get('/recipes/:id', async (req, res, next) => {
+// Plain-text download of one recipe. Registered before /recipes/:id so "12.txt"
+// is not looked up as an id. Same visibility gate as the page (404, never 403),
+// and never cached at the edge — a private recipe must not be served from
+// Cloudflare to the next visitor.
+app.get('/recipes/:id(\\d+).txt', async (req, res, next) => {
+  const r = await Recipe.findByPk(req.params.id);
+  if (!r || !canView(req, r)) return next();
+  res.set('Cache-Control', 'private, no-store');
+  res.attachment(recipeFilename(r));
+  res.type('text/plain; charset=utf-8').send(recipeToText(r));
+});
+
+app.get('/recipes/:id(\\d+)', async (req, res, next) => {
   const r = await Recipe.findByPk(req.params.id);
   if (!r || !canView(req, r)) return next(); // → 404, never 403
   const ingredients = parseIngredients(r);
@@ -132,6 +140,7 @@ app.get('/recipes/:id', async (req, res, next) => {
     temps: relevantTemps(r),
     tools: relevantTools(r),
     canEdit: canEdit(req, r),
+    recipeText: recipeToText(r),
   });
 });
 

@@ -40,6 +40,9 @@ a:hover { text-decoration: underline; }
 button.mini, .quick-timers button { background: transparent; border: 1px solid var(--border);
   color: var(--muted); border-radius: 8px; padding: 3px 10px; font-size: 0.82rem; cursor: pointer; }
 button.mini:hover, .quick-timers button:hover { border-color: var(--accent); color: var(--accent); }
+a.mini-link { border: 1px solid var(--border); color: var(--muted); border-radius: 8px; padding: 3px 10px;
+  font-size: 0.82rem; text-decoration: none; }
+a.mini-link:hover { border-color: var(--accent); color: var(--accent); }
 
 .temp-callout { background: #1c140f; border: 1px solid #4a2e1c; border-left: 3px solid var(--accent);
   border-radius: 10px; padding: 14px 18px; margin: 20px 0; }

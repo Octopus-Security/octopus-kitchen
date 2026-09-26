@@ -31,3 +31,18 @@ test('equipment matcher suggests relevant tools', () => {
   assert.ok(labels.some((l) => /thermometer/i.test(l)), 'chicken → thermometer');
   assert.strictEqual(relevantTools({ title: 'Garlic sesame noodles', ingredients: [{ name: 'soy sauce' }] }).some((t) => /thermometer/i.test(t.label)), false, 'no protein → no thermometer');
 });
+
+test('recipe text export: one recipe, all of it, with a safe filename', () => {
+  const { recipeToText, recipeFilename } = require('../recipe-text');
+  const r = {
+    title: 'Crème brûlée (batch)', servings: 6, keepsForDays: 3,
+    ingredients: JSON.stringify([{ name: 'heavy cream', quantity: '2', unit: 'cups' }, { name: 'salt' }]),
+    instructions: 'FOR THE CUSTARD\n1. Heat the cream.\n\n2. Bake.',
+  };
+  const text = recipeToText(r);
+  assert.ok(text.startsWith('Crème brûlée (batch)\n6 servings · keeps 3 days'), 'title + meta first');
+  assert.ok(text.includes('- 2 cups heavy cream\n- salt\n'), 'every ingredient, qty optional');
+  assert.ok(text.includes('METHOD\nFOR THE CUSTARD\n1. Heat the cream.\n\n2. Bake.'), 'method kept as written');
+  assert.strictEqual(recipeFilename(r), 'creme-brulee-batch.txt');
+  assert.strictEqual(recipeFilename({ title: '!!!' }), 'recipe.txt');
+});
