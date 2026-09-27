@@ -8,6 +8,8 @@
       <% if (recipe.keepsForDays) { %><span>keeps <%= recipe.keepsForDays %> days</span><% } %>
       <% if (recipe.prepMinutes) { %><span>prep <%= recipe.prepMinutes %>m</span><% } %>
       <% if (recipe.cookMinutes) { %><span>cook <%= recipe.cookMinutes %>m</span><% } %>
+      <button type="button" class="mini" id="copy-recipe">Copy all</button>
+      <a class="mini-link" href="/recipes/<%= recipe.id %>.txt" download>Download .txt</a>
       <% if (canEdit) { %>
         <form method="post" action="/recipes/<%= recipe.id %>/visibility" class="inline">
           <button type="submit" class="mini">
@@ -63,7 +65,9 @@
         </ul>
       </aside>
     <% } %>
+    <textarea id="recipe-text" hidden readonly><%= recipeText %></textarea>
   </article>
+  <script src="<%= asset('/recipe-export.js') %>" defer></script>
 
   <script type="application/ld+json">
   <%- JSON.stringify({
