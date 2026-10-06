@@ -15,6 +15,10 @@ services:
       # the public storefront (food.octo) serves public recipes with no session;
       # a session unlocks private recipes and management (kitchen.octo).
       - AUTH_SERVICE_URL=${AUTH_SERVICE_URL:-http://octopus-auth:3002}
+      # Per-user app access (appAccess.js): refuse accounts the owner has turned
+      # this app off for. Defaults to this app's own slug in octopus-auth's hub list.
+      - APP_ACCESS_SLUG=${APP_ACCESS_SLUG:-kitchen}
+      - UPGRADE_URL=${UPGRADE_URL:-}
       - AUTH_PUBLIC_URL=${AUTH_PUBLIC_URL:-https://auth.octopustechnology.net}
       # Which host is the public storefront vs the management UI. Same app, two
       # domains (the games pattern). Both have code defaults.

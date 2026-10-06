@@ -31,6 +31,18 @@ for (const method of ['get', 'post', 'put', 'patch', 'delete', 'use']) {
 
 const port = process.env.PORT || 3014;
 const AUTH_URL = process.env.AUTH_SERVICE_URL || 'http://octopus-auth:3002';
+// May THIS signed-in account use kitchen at all? Per-user app access enforced
+// here instead of only hiding the hub tile. Admins always pass; with no override
+// or default set the answer is "allowed" (see appAccess.js). The PUBLIC recipe
+// storefront is deliberately open to everyone, signed in or not, so it is not
+// gated for visitors it refuses; they are treated as anonymous there.
+const { createAppGate } = require('./appAccess');
+const appAccessGate = createAppGate({
+  authUrl:    AUTH_URL,
+  slug:       process.env.APP_ACCESS_SLUG || 'kitchen',
+  upgradeUrl: process.env.UPGRADE_URL || '',
+  appName:    'Kitchen',
+});
 const AUTH_PUBLIC_URL = process.env.AUTH_PUBLIC_URL || 'https://auth.octopustechnology.net';
 const PUBLIC_HOST = process.env.PUBLIC_HOST || 'food.octopustechnology.net';
 const APP_HOST = process.env.APP_HOST || 'kitchen.octopustechnology.net';
@@ -58,6 +70,8 @@ app.locals.PUBLIC_HOST = PUBLIC_HOST;
 app.get('/health', (req, res) => res.json({ status: 'ok', service: 'octopus-kitchen' }));
 app.get('/api/build', (req, res) => res.json({
   ok: true, service: 'octopus-kitchen', build: BUILD, startedAt: STARTED_AT,
+  // Derived from the gate object actually mounted below, so it cannot disagree with it.
+  ...(appAccessGate.slug ? { gate: appAccessGate.slug } : {}),
 }));
 
 // ── Optional SSO ──────────────────────────────────────────────────────────────
@@ -72,6 +86,24 @@ app.use(ssoSession, (req, res, next) => {
   res.locals.user = req.user || null;
   res.locals.isPublicHost = isPublicHost(req);
   next();
+});
+
+// Per-app access. A signed-in account that may not use kitchen is refused on the
+// app host. On the public storefront host it is simply treated as anonymous: the
+// public recipes were never behind a login, but its own private recipes must not
+// open for an account the owner has turned kitchen off for.
+app.use((req, res, next) => {
+  if (!req.user) return next();
+  if (isPublicHost(req)) {
+    // Ask the gate with a stand-in response: a refusal means "drop the session
+    // for this request", not "show a no-access page".
+    let done = false;
+    const finish = (err) => { if (!done) { done = true; next(err); } };
+    const refuse = () => { req.user = null; res.locals.user = null; finish(); };
+    const stub = { status() { return stub; }, type() { return stub; }, json: refuse, send: refuse };
+    return appAccessGate(req, stub, finish);
+  }
+  return appAccessGate(req, res, next);
 });
 
 function isPublicHost(req) {
