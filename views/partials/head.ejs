@@ -3,7 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <%# Brand pack favicon, served by octopus-auth (the pull model: auth hosts
+      the assets, this app holds only its slug). See
+      octopus-vault/FAVICON-PACK-SPEC.md §5. %>
+  <link rel="icon" type="image/svg+xml" href="https://auth.octopustechnology.net/brand/kitchen/favicon.svg" />
+  <link rel="apple-touch-icon" href="https://auth.octopustechnology.net/brand/kitchen/apple-touch-icon.png" />
+  <link rel="manifest" href="https://auth.octopustechnology.net/brand/kitchen/site.webmanifest" crossorigin="use-credentials" />
   <title><%= title %> — Octopus Kitchen</title>
   <% if (typeof metaDescription !== 'undefined' && metaDescription) { %>
   <meta name="description" content="<%= metaDescription %>" />
