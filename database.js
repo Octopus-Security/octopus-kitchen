@@ -21,6 +21,25 @@ const sequelize = new Sequelize({
   logging: false,
 });
 
+// Per-connection SQLite tuning. This dialect opens a separate handle per
+// transaction (connection-manager keys them by uuid) and never runs Sequelize's
+// afterConnect hook, so the pragmas are applied the first time each handle is
+// handed out. busy_timeout first, so the journal-mode switch can wait on a lock.
+// WAL needs the db in a directory (a named volume), not a single-file mount.
+const _tuned = new WeakSet();
+const _getConnection = sequelize.connectionManager.getConnection.bind(sequelize.connectionManager);
+sequelize.connectionManager.getConnection = async function tunedConnection(options) {
+  const connection = await _getConnection(options);
+  if (!_tuned.has(connection)) {
+    _tuned.add(connection);
+    await new Promise((resolve, reject) => connection.exec(
+      'PRAGMA busy_timeout=5000; PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL;',
+      err => (err ? reject(err) : resolve())));
+  }
+  return connection;
+};
+
+
 const Recipe = sequelize.define('Recipe', {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
   title: { type: DataTypes.STRING, allowNull: false },
@@ -61,6 +80,14 @@ const Recipe = sequelize.define('Recipe', {
 async function initDatabase() {
   await sequelize.authenticate();
   await sequelize.sync({ alter: true });
+  // Lookup indexes. Idempotent and additive; run after every sync so a table
+  // rebuilt by a schema change gets them back. Existing tables only gain an index.
+  for (const sql of [
+    'CREATE INDEX IF NOT EXISTS "idx_recipes_owner" ON "recipes" ("owner")',
+    'CREATE INDEX IF NOT EXISTS "idx_recipes_visibility" ON "recipes" ("visibility")',
+  ]) {
+    await sequelize.query(sql).catch(err => console.warn('[db] index:', err.message));
+  }
   console.log('[kitchen] Database initialized at', dbPath);
 
   const { seedDefaultRecipes } = require('./recipes-seed');
