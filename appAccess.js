@@ -26,6 +26,7 @@
 
 const CACHE_TTL_MS = 60 * 1000;
 const MAX_CACHE = 5000;
+const FETCH_TIMEOUT_MS = 5000;
 
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -35,10 +36,23 @@ function createAppGate({ authUrl, slug, upgradeUrl = '', appName = 'this app', f
   const doFetch = fetchImpl || ((...a) => fetch(...a));
   const cache = new Map();           // username → { allowed, at }
 
+  // One in-flight lookup per user: a page load fires a burst of API calls, and
+  // without this each one past an expired cache entry asked auth separately.
+  const inflight = new Map();        // username → Promise<boolean>
+
   async function allowed(req) {
     const key = req.user && req.user.username;
     const hit = key && cache.get(key);
     if (hit && now() - hit.at < CACHE_TTL_MS) return hit.allowed;
+    if (!key) return lookup(req, key, hit);
+    if (inflight.has(key)) return inflight.get(key);
+    const p = lookup(req, key, hit);        // never rejects: every failure is handled inside
+    inflight.set(key, p);
+    p.finally(() => { if (inflight.get(key) === p) inflight.delete(key); });
+    return p;
+  }
+
+  async function lookup(req, key, hit) {
 
     // Ask AS the user: forward whichever credential arrived instead of parsing it.
     const headers = {};
@@ -46,7 +60,9 @@ function createAppGate({ authUrl, slug, upgradeUrl = '', appName = 'this app', f
     if (req.get('authorization')) headers.Authorization = req.get('authorization');
 
     try {
-      const res = await doFetch(`${authUrl}/api/auth/apps/${encodeURIComponent(slug)}/allowed`, { headers });
+      const res = await doFetch(`${authUrl}/api/auth/apps/${encodeURIComponent(slug)}/allowed`, {
+        headers, signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+      });
       if (res.status === 404) {
         console.warn(`[access] "${slug}" is not an app octopus-auth knows — the gate is doing nothing. Check hub-apps.json.`);
         return true;

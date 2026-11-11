@@ -51,7 +51,8 @@ const KITCHEN_SERVICE_TOKEN = process.env.KITCHEN_SERVICE_TOKEN || '';
 app.set('trust proxy', true); // behind the estate reverse proxy — trust X-Forwarded-*
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-app.use(express.static(path.join(__dirname, 'public')));
+// Every reference is asset()-stamped (?v=<content hash>), so a changed file has a new URL.
+app.use(express.static(path.join(__dirname, 'public'), { maxAge: '1y', immutable: true }));
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 
