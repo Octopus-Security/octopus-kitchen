@@ -16,6 +16,11 @@ const {
 } = require('./ownership');
 
 const app = express();
+// Security headers + no-store for signed-in answers + message-free error logs (HIPAA map, 2026-11-12 sweep).
+const safeguards = require('./lib/safeguards');
+app.disable('x-powered-by');
+app.use(safeguards.secureHeaders());
+app.use(safeguards.noStoreWhenSignedIn());
 
 // Express 4 does not catch a rejected promise from an async handler, and an
 // unhandled rejection terminates the process — one rejecting query would kill
@@ -254,7 +259,7 @@ app.post('/api/recipes', requireServiceToken, async (req, res) => {
 // ── 404 + error handler ──────────────────────────────────────────────────────
 app.use((req, res) => res.status(404).render('404', { title: 'Not found' }));
 app.use((err, req, res, next) => {
-  console.error('[kitchen] error:', err.message);
+  console.error('[kitchen] error:', safeguards.safeError(err));
   res.status(500).json({ ok: false, error: 'internal error' });
 });
 
