@@ -1,4 +1,5 @@
 'use strict';
+const safeguards = require('./lib/safeguards');
 
 // Kitchen's own database. The Recipe shape is carried over from octopus-shopper
 // (where the recipe book was first built) so recipe content moves across
@@ -92,7 +93,7 @@ async function initDatabase() {
 
   const { seedDefaultRecipes } = require('./recipes-seed');
   await seedDefaultRecipes(Recipe).catch(err =>
-    console.error('[kitchen] seed-recipes failed:', err.message));
+    console.error('[kitchen] seed-recipes failed:', safeguards.safeError(err)));
 }
 
 module.exports = { Recipe, sequelize, initDatabase };
