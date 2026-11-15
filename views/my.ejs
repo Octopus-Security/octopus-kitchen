@@ -1,10 +1,12 @@
 <%- include('partials/head', { title, asset }) %>
-<%- include('partials/nav', { user }) %>
+<%- include('partials/nav', { user, isReviewer }) %>
 
   <div class="hero-title">
     <h1>My recipes</h1>
-    <p>Toggle any recipe between public (shows on <%= PUBLIC_HOST %>) and private.</p>
+    <p>A recipe stays on your account until you ask to publish it. It shows on <%= PUBLIC_HOST %> after it is reviewed.</p>
   </div>
+
+  <p><a class="btn" href="/recipes/new">Add a recipe</a></p>
 
   <% if (!recipes.length) { %><p class="muted">You have no recipes yet.</p><% } %>
 
@@ -13,8 +15,11 @@
       <li>
         <a href="/recipes/<%= r.id %>"><%= r.title %></a>
         <span class="pill <%= r.visibility %>"><%= r.visibility %></span>
+        <% if (r.reviewStatus === 'pending') { %><span class="pill pending">waiting for review</span><% } %>
+        <% if (r.reviewStatus === 'rejected') { %><span class="pill rejected">not added</span><% } %>
+        <% if (r.reviewNote) { %><span class="muted"><%= r.reviewNote %></span><% } %>
         <form method="post" action="/recipes/<%= r.id %>/visibility" class="inline">
-          <button type="submit" class="mini"><%= r.visibility === 'public' ? 'Make private' : 'Make public' %></button>
+          <button type="submit"><%= r.visibility === 'public' ? 'Make private' : (isReviewer ? 'Make public' : 'Ask to publish') %></button>
         </form>
       </li>
     <% }); %>

@@ -1,5 +1,5 @@
 <%- include('partials/head', { title, asset, metaDescription: (recipe.summary || (recipe.title + ' — ingredients, steps and safe cooking temperatures.')) }) %>
-<%- include('partials/nav', { user }) %>
+<%- include('partials/nav', { user, isReviewer }) %>
 
   <article class="recipe">
     <h1><%= recipe.title %></h1>
@@ -13,11 +13,16 @@
       <% if (canEdit) { %>
         <form method="post" action="/recipes/<%= recipe.id %>/visibility" class="inline">
           <button type="submit" class="mini">
-            <%= recipe.visibility === 'public' ? 'Public — make private' : 'Private — make public' %>
+            <%= recipe.visibility === 'public' ? 'Public — make private' : (isReviewer ? 'Private — make public' : 'Private — ask to publish') %>
           </button>
         </form>
       <% } %>
     </div>
+    <% if (recipe.reviewStatus === 'pending') { %>
+      <p class="muted">Waiting for review. This stays off the public site until it is added.</p>
+    <% } else if (recipe.reviewStatus === 'rejected') { %>
+      <p class="muted">Not added to the public site.<%= recipe.reviewNote ? ' ' + recipe.reviewNote : '' %></p>
+    <% } %>
 
     <% if (temps.length) { %>
       <aside class="temp-callout">

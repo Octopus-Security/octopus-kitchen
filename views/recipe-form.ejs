@@ -1,0 +1,37 @@
+<%- include('partials/head', { title, asset }) %>
+<%- include('partials/nav', { user, isReviewer }) %>
+
+  <div class="hero-title">
+    <h1>Add a recipe</h1>
+    <p>It stays on your account. Ask to publish it if you want it on the public site. One ingredient per line, like <span class="muted">2 cups rice</span>.</p>
+  </div>
+
+  <% if (error) { %><p class="form-error" role="alert"><%= error %></p><% } %>
+
+  <form class="recipe-form" method="post" action="/recipes">
+    <label>Name
+      <input name="title" required maxlength="160" value="<%= form.title || '' %>" autocomplete="off">
+    </label>
+    <label>Servings
+      <input name="servings" type="number" min="1" max="99" inputmode="numeric" value="<%= form.servings || 1 %>">
+    </label>
+    <label>Ingredients
+      <textarea name="ingredients" required rows="8" placeholder="2 cups rice&#10;1 tbsp soy sauce&#10;green onion"><%= form.ingredients || '' %></textarea>
+    </label>
+    <label>Method
+      <textarea name="instructions" required rows="8" placeholder="1. Rinse the rice.&#10;2. Simmer until tender."><%= form.instructions || '' %></textarea>
+    </label>
+    <label>Short description <span class="muted">(optional)</span>
+      <input name="summary" maxlength="300" value="<%= form.summary || '' %>">
+    </label>
+    <label>Tags <span class="muted">(optional, comma-separated)</span>
+      <input name="tags" maxlength="200" value="<%= form.tags || '' %>">
+    </label>
+    <label class="check-line">
+      <input type="checkbox" name="request" value="on" <% if (form.request) { %>checked<% } %>>
+      <span><%= isReviewer ? 'Make this public now' : 'Ask to publish this' %></span>
+    </label>
+    <button type="submit">Save recipe</button>
+  </form>
+
+<%- include('partials/foot', { hasAffiliate }) %>

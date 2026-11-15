@@ -11,8 +11,9 @@ const { allTemps, relevantTemps } = require('./safe-temps');
 const { relevantTools } = require('./kitchen-tools');
 const { withTag, amazonSearch, AMAZON_TAG } = require('./amazon');
 const { recipeToText, recipeFilename, parseIngredients } = require('./recipe-text');
+const { createFromBody, toggleRow, reviewRow, publishDecision } = require('./lib/recipe-review');
 const {
-  ownerOf, publicWhere, visibleWhere, ownedWhere, canView, canEdit,
+  ownerOf, publicWhere, visibleWhere, ownedWhere, canView, canEdit, isReviewer,
 } = require('./ownership');
 
 const app = express();
@@ -90,6 +91,7 @@ const ssoSession = createSSOMiddleware({
 });
 app.use(ssoSession, (req, res, next) => {
   res.locals.user = req.user || null;
+  res.locals.isReviewer = isReviewer(req);
   res.locals.isPublicHost = isPublicHost(req);
   next();
 });
@@ -137,6 +139,7 @@ function recipeCard(r) {
   return {
     id: r.id, title: r.title, servings: r.servings, tags: r.tags,
     summary: r.summary, heroImage: r.heroImage, visibility: r.visibility,
+    reviewStatus: r.reviewStatus || null, reviewNote: r.reviewNote || '',
   };
 }
 
@@ -152,6 +155,16 @@ app.get('/', async (req, res) => {
 app.get('/recipes', async (req, res) => {
   const recipes = await Recipe.findAll({ where: visibleWhere(req), order: [['title', 'ASC']] });
   res.render('index', { title: 'Recipes', recipes: recipes.map(recipeCard) });
+});
+
+app.get('/recipes/new', requireLogin, (req, res) => {
+  res.render('recipe-form', { title: 'New recipe', error: null, form: {} });
+});
+
+app.post('/recipes', requireLogin, async (req, res) => {
+  const made = await createFromBody(Recipe, req.body || {}, { owner: ownerOf(req), isReviewer: isReviewer(req) });
+  if (!made.ok) return res.status(made.status).render('recipe-form', { title: 'New recipe', error: made.error, form: req.body || {} });
+  res.redirect('/recipes/' + made.row.id);
 });
 
 // Plain-text download of one recipe. Registered before /recipes/:id so "12.txt"
@@ -220,9 +233,34 @@ app.get('/my', requireLogin, async (req, res) => {
 app.post('/recipes/:id/visibility', requireLogin, async (req, res, next) => {
   const r = await Recipe.findByPk(req.params.id);
   if (!r || !canEdit(req, r)) return next(); // 404
-  r.visibility = r.visibility === 'public' ? 'private' : 'public';
-  await r.save();
+  await toggleRow(r, { isReviewer: isReviewer(req) });
   res.redirect('/my');
+});
+
+// Reviewers see recipes waiting to be public. Anyone else gets the same 404
+// as a missing page. Approving is what puts one on the storefront.
+app.get('/review', async (req, res, next) => {
+  if (!isReviewer(req)) return next();
+  const rows = await Recipe.findAll({ where: { reviewStatus: 'pending' }, order: [['updatedAt', 'ASC']] });
+  res.render('review', {
+    title: 'Recipe review',
+    recipes: rows.map((r) => ({
+      id: r.id, title: r.title, owner: r.owner || '', servings: r.servings, summary: r.summary || '',
+      ingredients: parseIngredients(r), instructions: r.instructions || '',
+    })),
+  });
+});
+
+app.post('/review/:id(\\d+)', async (req, res, next) => {
+  if (!isReviewer(req)) return next();
+  const r = await Recipe.findByPk(req.params.id);
+  const decided = await reviewRow(r, {
+    isReviewer: true,
+    decision: req.body && req.body.decision,
+    note: req.body && req.body.note,
+  });
+  if (!decided.ok) return next();
+  res.redirect('/review');
 });
 
 app.get('/login', (req, res) => res.redirect(`${AUTH_PUBLIC_URL}/login`));
@@ -242,6 +280,8 @@ app.get('/api/recipes/:id', requireServiceToken, async (req, res) => {
 app.post('/api/recipes', requireServiceToken, async (req, res) => {
   const b = req.body || {};
   if (!b.title || !b.ingredients) return res.status(400).json({ ok: false, error: 'title and ingredients required' });
+  const askedPublic = b.visibility === 'public' || b.requestPublication === true;
+  const access = publishDecision({ isReviewer: isReviewer(req), requestPublic: askedPublic });
   const r = await Recipe.create({
     title: b.title,
     servings: b.servings || 1,
@@ -251,7 +291,8 @@ app.post('/api/recipes', requireServiceToken, async (req, res) => {
     tags: b.tags || '',
     source: b.source || 'text',
     owner: ownerOf(req),
-    visibility: b.visibility === 'public' ? 'public' : 'private',
+    visibility: access.visibility,
+    reviewStatus: access.reviewStatus,
   });
   res.status(201).json({ ok: true, id: r.id });
 });

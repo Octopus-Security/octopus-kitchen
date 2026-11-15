@@ -7,6 +7,10 @@
       <a href="/timers">Timers</a>
       <% if (user) { %>
         <a href="/my">My recipes</a>
+        <a href="/recipes/new">Add a recipe</a>
+        <% if (typeof isReviewer !== 'undefined' && isReviewer) { %>
+          <a href="/review">Review</a>
+        <% } %>
       <% } else { %>
         <a href="/login">Log in</a>
       <% } %>

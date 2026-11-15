@@ -76,6 +76,12 @@ const Recipe = sequelize.define('Recipe', {
   prepMinutes: { type: DataTypes.INTEGER, allowNull: true },
   cookMinutes: { type: DataTypes.INTEGER, allowNull: true },
   summary: { type: DataTypes.TEXT, allowNull: true },       // meta description / card blurb
+
+  // Publication. Null on a private recipe and on the seeded public book.
+  // pending: the author asked; visibility stays private until a reviewer decides.
+  // approved / rejected: the reviewer's decision. Nullable so alter is additive.
+  reviewStatus: { type: DataTypes.STRING, allowNull: true },
+  reviewNote: { type: DataTypes.TEXT, allowNull: true },
 }, { tableName: 'recipes' });
 
 async function initDatabase() {
@@ -86,6 +92,7 @@ async function initDatabase() {
   for (const sql of [
     'CREATE INDEX IF NOT EXISTS "idx_recipes_owner" ON "recipes" ("owner")',
     'CREATE INDEX IF NOT EXISTS "idx_recipes_visibility" ON "recipes" ("visibility")',
+    'CREATE INDEX IF NOT EXISTS "idx_recipes_review" ON "recipes" ("reviewStatus")',
   ]) {
     await sequelize.query(sql).catch(err => console.warn('[db] index:', err.message));
   }

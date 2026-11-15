@@ -27,6 +27,13 @@ function ownerOf(req) {
 
 const isAdminReq = (req) => !!ADMIN_USERNAME && ownerOf(req) === ADMIN_USERNAME;
 
+// Catalogue review. The session role is what auth actually sends. ADMIN_USERNAME
+// still counts, including a service call that has no role on req.user.
+function isReviewer(req) {
+  if (req && req.user && req.user.role === 'admin') return true;
+  return isAdminReq(req);
+}
+
 /** Rows visible on the PUBLIC storefront — public only, no session needed. */
 const publicWhere = () => ({ visibility: 'public' });
 
@@ -63,4 +70,4 @@ function canEdit(req, row) {
   return row.owner === me;
 }
 
-module.exports = { ownerOf, isAdminReq, publicWhere, visibleWhere, ownedWhere, canView, canEdit, ADMIN_USERNAME };
+module.exports = { ownerOf, isAdminReq, isReviewer, publicWhere, visibleWhere, ownedWhere, canView, canEdit, ADMIN_USERNAME };

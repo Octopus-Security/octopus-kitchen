@@ -1,0 +1,45 @@
+<%- include('partials/head', { title, asset }) %>
+<%- include('partials/nav', { user, isReviewer }) %>
+
+  <div class="hero-title">
+    <h1>Recipe review</h1>
+    <p>These stay off the public site until you add them. Rejecting leaves them on the author's account.</p>
+  </div>
+
+  <% if (!recipes.length) { %><p class="muted">Nothing is waiting.</p><% } %>
+
+  <ul class="review-list">
+    <% recipes.forEach(function (r) { %>
+      <li class="review-card">
+        <h2><%= r.title %></h2>
+        <p class="muted"><%= r.owner || 'unknown author' %><% if (r.servings) { %> · <%= r.servings %> servings<% } %></p>
+        <% if (r.summary) { %><p><%= r.summary %></p><% } %>
+        <h3>Ingredients</h3>
+        <ul class="ingredients">
+          <% r.ingredients.forEach(function (i) { %>
+            <li>
+              <span class="qty"><%= [i.quantity, i.unit].filter(Boolean).join(' ') %></span>
+              <span class="name"><%= i.name %></span>
+            </li>
+          <% }); %>
+        </ul>
+        <h3>Method</h3>
+        <p class="method"><%= r.instructions %></p>
+        <div class="review-actions">
+          <form method="post" action="/review/<%= r.id %>">
+            <input type="hidden" name="decision" value="approve">
+            <button type="submit">Add to the public site</button>
+          </form>
+          <form method="post" action="/review/<%= r.id %>" class="review-reject">
+            <input type="hidden" name="decision" value="reject">
+            <label>Note to the author
+              <input type="text" name="note" maxlength="500" placeholder="Optional">
+            </label>
+            <button type="submit">Leave it private</button>
+          </form>
+        </div>
+      </li>
+    <% }); %>
+  </ul>
+
+<%- include('partials/foot', { hasAffiliate }) %>
