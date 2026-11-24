@@ -1,0 +1,37 @@
+<%- include('partials/head', { title, asset }) %>
+<%- include('partials/nav', { user, isReviewer }) %>
+
+  <div class="hero-title">
+    <h1>Shelf-life estimates</h1>
+    <p>Planning figures, not a safety guarantee. A printed best-by date always wins when it is sooner.</p>
+  </div>
+
+  <h2>What yours has done</h2>
+  <p class="muted">Marking something spoiled shortens the estimate for that product, for you only. Finishing something never lengthens it.</p>
+  <% if (!learned.length) { %><p class="muted">Nothing recorded yet.</p><% } %>
+  <ul class="pantry-list">
+    <% learned.forEach(function (o) { %>
+      <li class="pantry-card">
+        <p><strong><%= o.label %></strong>: <%= o.outcome %> <%= o.days %> day<%= o.days === 1 ? '' : 's' %> after <%= o.state === 'unopened' ? 'buying' : o.state === 'made' ? 'it was made' : 'opening' %></p>
+        <form method="post" action="/pantry/observations/<%= o.id %>/delete"><button class="mini">Forget this</button></form>
+      </li>
+    <% }); %>
+  </ul>
+
+  <h2>Defaults</h2>
+  <p class="muted">The low end of what the source says unless noted. The live USDA FoodKeeper database could not be reached when these were written, so it was not checked.</p>
+  <ul class="muted">
+    <% Object.keys(sources).forEach(function (k) { %><li><%= k %>: <% if (sources[k].url) { %><a href="<%= sources[k].url %>" rel="noopener noreferrer"><%= sources[k].label %></a><% } else { %><%= sources[k].label %><% } %></li><% }); %>
+  </ul>
+  <div class="table-wrap">
+    <table class="temps">
+      <thead><tr><th>Food</th><th>Sealed, days</th><th>Opened, days</th><th>Source</th></tr></thead>
+      <tbody>
+        <% categories.forEach(function (c) { %>
+          <tr><td><%= c.label %></td><td class="num"><%= c.unopened == null ? 'label date' : c.unopened %></td><td class="num"><%= c.opened %></td><td class="note"><%= c.source %>: <%= c.note %></td></tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+
+<%- include('partials/foot', { hasAffiliate }) %>

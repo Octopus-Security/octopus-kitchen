@@ -1,0 +1,88 @@
+<%- include('partials/head', { title, asset }) %>
+<%- include('partials/nav', { user, isReviewer }) %>
+<% function val(k) { return item[k] == null ? '' : item[k]; } %>
+
+  <div class="hero-title">
+    <h1><%= title %></h1>
+    <% if (estimate && estimate.goodUntil) { %>
+      <p>Probably good until <%= dateLabel(estimate.goodUntil) %>: <%= estimate.why %>. An estimate, not a safety guarantee.</p>
+    <% } %>
+  </div>
+
+  <% if (error) { %><p class="form-error" role="alert"><%= error %></p><% } %>
+
+  <form class="recipe-form" id="pantry-form" method="post" action="<%= item.id ? '/pantry/' + item.id : '/pantry' %>">
+    <label>Name <input name="name" required maxlength="120" value="<%= val('name') %>" autocomplete="off"></label>
+    <label>Brand <input name="brand" maxlength="80" value="<%= val('brand') %>" autocomplete="off"></label>
+    <label>Kind of food
+      <select name="category">
+        <% categories.forEach(function (c) { %><option value="<%= c.key %>" <% if ((item.category || 'other') === c.key) { %>selected<% } %>><%= c.label %></option><% }); %>
+      </select>
+    </label>
+    <label>Quantity <input name="quantity" maxlength="60" value="<%= val('quantity') %>" placeholder="32 oz tub"></label>
+    <div class="two-up">
+      <label>Bought <input type="date" name="boughtOn" max="<%= today %>" value="<%= val('boughtOn') %>"></label>
+      <label>Opened <input type="date" name="openedOn" max="<%= today %>" value="<%= val('openedOn') %>"></label>
+      <label>Made (homemade) <input type="date" name="madeOn" max="<%= today %>" value="<%= val('madeOn') %>"></label>
+      <label>Printed best-by <input type="date" name="bestBy" value="<%= val('bestBy') %>"></label>
+    </div>
+    <label>Notes <textarea name="notes" rows="3" maxlength="1000"><%= val('notes') %></textarea></label>
+
+    <h2>Nutrition facts</h2>
+  <section id="scan" class="tools-box" hidden
+    data-lib="<%= asset(ocrDir + '/tesseract.min.js') %>"
+    data-worker="<%= asset(ocrDir + '/worker.min.js') %>"
+    data-core-simd="<%= asset(ocrDir + '/tesseract-core-simd-lstm.wasm.js') %>"
+    data-core="<%= asset(ocrDir + '/tesseract-core-lstm.wasm.js') %>"
+    data-lang="<%= ocrDir %>">
+    <h2>Scan a label</h2>
+    <p class="muted">Your device reads the photo. The photo is never uploaded.</p>
+    <p><input type="file" id="scan-file" accept="image/*" aria-label="Photo of the nutrition label"></p>
+    <p><button type="button" class="mini" id="scan-go">Scan</button></p>
+    <p id="scan-status" role="status"></p>
+    <ul id="scan-notes"></ul>
+  </section>
+
+    <p class="muted">Per serving. Leave blank what you do not know.</p>
+    <div class="two-up">
+      <label>Serving size <input name="servingSize" maxlength="60" value="<%= val('servingSize') %>" placeholder="2/3 cup (170g)"></label>
+      <label>Servings per container <input name="servings" type="number" step="any" min="0" inputmode="decimal" value="<%= val('servings') %>"></label>
+      <label>Calories (kcal) <input name="kcal" type="number" step="any" min="0" inputmode="decimal" value="<%= val('kcal') %>"></label>
+      <label>Protein (g) <input name="protein" type="number" step="any" min="0" inputmode="decimal" value="<%= val('protein') %>"></label>
+      <label>Carbs (g) <input name="carbs" type="number" step="any" min="0" inputmode="decimal" value="<%= val('carbs') %>"></label>
+      <label>Fat (g) <input name="fat" type="number" step="any" min="0" inputmode="decimal" value="<%= val('fat') %>"></label>
+    </div>
+
+    <h3>Your own fields</h3>
+    <p class="muted">Rename or edit any of them. Clear a name to remove it.</p>
+    <div id="custom-rows">
+      <% custom.concat(custom.length < 18 ? [{}, {}] : []).forEach(function (c) { %>
+        <div class="custom-row">
+          <input name="customName" maxlength="40" value="<%= c.name || '' %>" placeholder="Sodium" aria-label="Field name">
+          <input name="customValue" maxlength="60" value="<%= c.value || '' %>" placeholder="65 mg" aria-label="Field value">
+          <button type="button" class="mini remove-row" hidden aria-label="Remove field">Remove</button>
+        </div>
+      <% }); %>
+    </div>
+    <template id="custom-row">
+      <div class="custom-row">
+        <input name="customName" maxlength="40" placeholder="Sodium" aria-label="Field name">
+        <input name="customValue" maxlength="60" placeholder="65 mg" aria-label="Field value">
+        <button type="button" class="mini remove-row" hidden aria-label="Remove field">Remove</button>
+      </div>
+    </template>
+    <p><button type="button" class="mini" id="add-custom" hidden>Add a field</button></p>
+
+    <button type="submit">Save</button>
+  </form>
+
+  <% if (item.id) { %>
+    <p><a class="mini-link" href="/pantry/new?from=<%= item.id %>">Add another of this</a></p>
+    <details><summary>Delete</summary>
+      <form method="post" action="/pantry/<%= item.id %>/delete"><p class="muted">Removes this entry. If it spoiled, use Spoiled today instead so the estimate learns.</p><button class="mini">Delete it</button></form>
+    </details>
+  <% } %>
+
+  <script src="<%= asset('/nutrition-parse.js') %>" defer></script>
+  <script src="<%= asset('/nutrition-scan.js') %>" defer></script>
+<%- include('partials/foot', { hasAffiliate }) %>

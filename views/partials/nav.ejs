@@ -6,6 +6,7 @@
       <a href="/temps">Safe temps</a>
       <a href="/timers">Timers</a>
       <% if (user) { %>
+        <% if (!locals.isPublicHost) { %><a href="/pantry">Pantry</a><% } %>
         <a href="/my">My recipes</a>
         <a href="/recipes/new">Add a recipe</a>
         <% if (typeof isReviewer !== 'undefined' && isReviewer) { %>

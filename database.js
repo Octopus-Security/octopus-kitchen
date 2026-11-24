@@ -84,9 +84,17 @@ const Recipe = sequelize.define('Recipe', {
   reviewNote: { type: DataTypes.TEXT, allowNull: true },
 }, { tableName: 'recipes' });
 
+const { definePantryModels, createAdditively } = require('./lib/pantry-models');
+const pantryModels = definePantryModels(sequelize);
+
 async function initDatabase() {
   await sequelize.authenticate();
-  await sequelize.sync({ alter: true });
+  // Models marked additiveOnly are never put through alter, which rebuilds a SQLite
+  // table (copy, drop, copy back). The rest keep the sync they have always had.
+  for (const model of Object.values(sequelize.models)) {
+    if (model.options.additiveOnly) await createAdditively(model);
+    else await model.sync({ alter: true });
+  }
   // Lookup indexes. Idempotent and additive; run after every sync so a table
   // rebuilt by a schema change gets them back. Existing tables only gain an index.
   for (const sql of [
@@ -103,4 +111,4 @@ async function initDatabase() {
     console.error('[kitchen] seed-recipes failed:', safeguards.safeError(err)));
 }
 
-module.exports = { Recipe, sequelize, initDatabase };
+module.exports = { Recipe, pantryModels, sequelize, initDatabase };
