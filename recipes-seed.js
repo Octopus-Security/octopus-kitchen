@@ -1,5 +1,5 @@
 /**
- * seed-recipes.js — the house meal rotation, seeded via findOrCreate so
+ * seed-recipes.js — the house meal rotation, seeded by title so
  * it's fully idempotent (new recipes are added, existing ones never touched,
  * nothing ever duplicated regardless of how many times it runs).
  *
@@ -11,6 +11,8 @@
  */
 
 'use strict';
+
+const { Op } = require('sequelize');
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -1464,9 +1466,15 @@ async function seedDefaultRecipes(Recipe) {
   const owner = (process.env.SERVICE_DEFAULT_OWNER || process.env.ADMIN_USERNAME || '').trim() || null;
   let added = 0;
   for (const r of RECIPES) {
-    const [, created] = await Recipe.findOrCreate({
-      where: { title: r.title },
-      defaults: {
+    // Only a seeded row or the house's own row counts as "already there": another
+    // user's recipe that happens to share the title must not keep this one out.
+    // One bad entry must not keep the rest out either.
+    try {
+      const there = await Recipe.findOne({
+        where: { title: r.title, [Op.or]: [{ source: 'seed' }, { owner }, { owner: null }] },
+      });
+      if (there) continue;
+      await Recipe.create({
         title: r.title,
         servings: r.servings,
         ingredients: JSON.stringify(r.ingredients),
@@ -1481,9 +1489,11 @@ async function seedDefaultRecipes(Recipe) {
         source: 'seed',
         owner,
         visibility: 'public',
-      },
-    });
-    if (created) added++;
+      });
+      added++;
+    } catch (err) {
+      console.error(`[kitchen] seed recipe "${r.title}" failed:`, err.name);
+    }
   }
   if (added > 0) console.log(`[kitchen] seeded ${added} new recipes`);
   else console.log(`[kitchen] recipes already seeded — no changes`);
