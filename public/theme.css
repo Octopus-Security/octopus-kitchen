@@ -128,3 +128,28 @@ a.btn { display: inline-flex; align-items: center; text-decoration: none; }
 .site-footer .disclosure { color: var(--muted); }
 
 @media (max-width: 480px) { .nav-links a { margin-left: 10px; } }
+
+/* Pantry */
+.pantry-bar { display: flex; flex-wrap: wrap; gap: 10px; }
+.pantry-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.pantry-card { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--border); border-radius: 12px; padding: 12px 16px; min-width: 0; overflow-wrap: anywhere; }
+.pantry-card.soon { border-left-color: #e6c36a; }
+.pantry-card.past { border-left-color: #e07a7a; }
+.pantry-card.ok { border-left-color: #7bd88f; }
+.pantry-card p { margin: 4px 0; }
+.pantry-name { font-weight: 600; min-height: 44px; display: inline-flex; align-items: center; flex-wrap: wrap; gap: 0 8px; }
+.pantry-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.pantry-actions form { margin: 0; }
+.small { font-size: 0.85rem; }
+.pre { white-space: pre-wrap; }
+details > summary { min-height: 44px; display: flex; align-items: center; cursor: pointer; color: var(--muted); }
+.two-up { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr)); gap: 0 12px; }
+.recipe-form select { font: inherit; font-size: 16px; min-height: 44px; padding: 10px 12px; width: 100%; max-width: 100%; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 8px; }
+.two-up > *, .two-up input { min-width: 0; width: 100%; }
+.custom-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+.custom-row input { flex: 1 1 120px; min-width: 0; }
+.prep-row { border: 1px solid var(--border); border-radius: 10px; margin: 10px 0; padding: 8px 12px; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.recipe-form button.mini { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+input.scanned { outline: 2px solid #e6c36a; }
+#scan-file { font-size: 16px; min-height: 44px; max-width: 100%; }
+.recipe-form input[type=date], .recipe-form select { color-scheme: dark; }

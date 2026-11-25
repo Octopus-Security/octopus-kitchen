@@ -1,0 +1,90 @@
+<%- include('partials/head', { title, asset }) %>
+<%- include('partials/nav', { user, isReviewer }) %>
+<% function state(x) {
+     if (x.spoiled && x.spoiled.length) return 'Contains ' + x.spoiled.join(', ') + ', which you marked spoiled';
+     if (!x.goodUntil) return 'no estimate yet: add a date';
+     return x.urgency === 'past' ? 'was probably good until ' + x.until : 'probably good until ' + x.until;
+   } %>
+
+  <div class="hero-title">
+    <h1>Pantry</h1>
+    <p>Soonest to go off first. Dates are estimates, not a safety guarantee: if it looks or smells wrong, or you are unsure, throw it out.</p>
+  </div>
+
+  <p class="pantry-bar">
+    <a class="btn" href="/pantry/new">Add food</a>
+    <a class="mini-link" href="/pantry/preps/new">New prep</a>
+    <a class="mini-link" href="/pantry/shelf-life">Estimates</a>
+  </p>
+
+  <% if (soon.length) { %>
+    <section class="temp-callout use-soon" aria-labelledby="use-soon">
+      <h2 id="use-soon">Use soon or check</h2>
+      <ul>
+        <% soon.forEach(function (x) { %>
+          <li><strong><%= x.name %></strong><% if (x.kind === 'prep') { %> (prep)<% } %>: <%= x.since %>, <%= state(x) %></li>
+        <% }); %>
+      </ul>
+    </section>
+  <% } %>
+
+  <h2>Food</h2>
+  <% if (!items.length) { %><p class="muted">Nothing here yet. Add what you just opened.</p><% } %>
+  <ul class="pantry-list">
+    <% items.forEach(function (i) { %>
+      <li class="pantry-card <%= i.urgency %>">
+        <a class="pantry-name" href="/pantry/<%= i.id %>/edit"><%= i.name %><% if (i.brand) { %> <span class="muted"><%= i.brand %></span><% } %></a>
+        <p><%= i.since %>, <%= state(i) %></p>
+        <p class="muted small"><%= i.categoryLabel %><% if (i.quantity) { %> · <%= i.quantity %><% } %><% if (i.why) { %> · <%= i.why %><% } %></p>
+        <div class="pantry-actions">
+          <% if (!i.openedOn && !i.madeOn) { %><form method="post" action="/pantry/<%= i.id %>/opened"><button class="mini">Opened today</button></form><% } %>
+          <form method="post" action="/pantry/<%= i.id %>/finished"><button class="mini">Finished</button></form>
+          <form method="post" action="/pantry/<%= i.id %>/spoiled"><button class="mini">Spoiled today</button></form>
+        </div>
+      </li>
+    <% }); %>
+  </ul>
+
+  <h2 id="preps">Preps</h2>
+  <p class="muted small">What is in each batch and how long it keeps. Log eating one in Health; the count here is only what is in the fridge.</p>
+  <ul class="pantry-list">
+    <% preps.forEach(function (p) { %>
+      <li class="pantry-card <%= p.urgency %>">
+        <span class="pantry-name"><%= p.name %></span>
+        <p><%= p.since %>, <%= state(p) %></p>
+        <p>Per portion: <%= p.kcal == null ? 'kcal unknown' : p.kcal + ' kcal' %> · protein <%= p.protein == null ? 'unknown' : p.protein + ' g' %> · carbs <%= p.carbs == null ? 'unknown' : p.carbs + ' g' %> · fat <%= p.fat == null ? 'unknown' : p.fat + ' g' %></p>
+        <% if (p.missing.length) { %><p class="form-error small">Totals are low: incomplete numbers for <%= p.missing.join(', ') %>.</p><% } %>
+        <details><summary>What is in it</summary>
+          <ul><% p.ingredients.forEach(function (g) { %><li><%= g.name %><% if (g.amount) { %>, <%= g.amount %><% } %><% if (g.servings) { %> (<%= g.servings %> servings in the batch)<% } %></li><% }); %></ul>
+          <% if (p.notes) { %><p class="pre"><%= p.notes %></p><% } %>
+          <form method="post" action="/pantry/preps/<%= p.id %>/delete"><button class="mini">Delete this prep</button></form>
+        </details>
+        <p class="muted small"><%= p.portionsLeft %> of <%= p.portions %> left<% if (p.why) { %> · <%= p.why %><% } %></p>
+        <div class="pantry-actions">
+          <form method="post" action="/pantry/preps/<%= p.id %>/portions"><input type="hidden" name="portionsLeft" value="<%= p.portionsLeft - 1 %>"><button class="mini">One less</button></form>
+          <form method="post" action="/pantry/preps/<%= p.id %>/finished"><button class="mini">Finished</button></form>
+          <form method="post" action="/pantry/preps/<%= p.id %>/spoiled"><button class="mini">Spoiled today</button></form>
+        </div>
+      </li>
+    <% }); %>
+  </ul>
+  <% if (!preps.length) { %><p class="muted">No preps in the fridge.</p><% } %>
+
+  <% if (ended.length) { %>
+    <details class="ended"><summary>Finished and spoiled</summary>
+      <ul class="pantry-list">
+        <% ended.forEach(function (x) { var base = x.kind === 'prep' ? '/pantry/preps/' : '/pantry/'; %>
+          <li class="pantry-card">
+            <span class="pantry-name"><%= x.name %></span>
+            <p class="muted"><%= x.status %> <%= x.endedOn %></p>
+            <div class="pantry-actions">
+              <form method="post" action="<%= base + x.id %>/restore"><button class="mini">Put back</button></form>
+              <% if (x.kind === 'item') { %><a class="mini-link" href="/pantry/new?from=<%= x.id %>">Add again</a><% } %>
+            </div>
+          </li>
+        <% }); %>
+      </ul>
+    </details>
+  <% } %>
+
+<%- include('partials/foot', { hasAffiliate }) %>

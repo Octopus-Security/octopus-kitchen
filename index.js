@@ -6,7 +6,7 @@ const fs = require('fs');
 const { createSSOMiddleware } = require('@octopus-security/auth-client');
 
 const { BUILD, STARTED_AT, asset } = require('./build');
-const { Recipe, initDatabase } = require('./database');
+const { Recipe, pantryModels, initDatabase } = require('./database');
 const { allTemps, relevantTemps } = require('./safe-temps');
 const { relevantTools } = require('./kitchen-tools');
 const { withTag, amazonSearch, AMAZON_TAG } = require('./amazon');
@@ -16,6 +16,8 @@ const { createFromBody, toggleRow, reviewRow } = require('./lib/recipe-review');
 const {
   ownerOf, publicWhere, visibleWhere, ownedWhere, canView, canEdit, isReviewer,
 } = require('./ownership');
+
+const { createPantryRouter } = require('./lib/pantry-routes');
 
 const app = express();
 // Security headers + no-store for signed-in answers + message-free error logs (HIPAA map, 2026-11-12 sweep).
@@ -268,6 +270,9 @@ app.post('/review/:id(\\d+)', async (req, res, next) => {
 });
 
 app.get('/login', (req, res) => res.redirect(`${AUTH_PUBLIC_URL}/login`));
+
+// ── Pantry: food dating, preps, GET /api/service/pantry/expiring ────────────
+app.use(createPantryRouter({ models: pantryModels, ownerOf, requireLogin, requireServiceToken, isPublicHost }));
 
 // ── 404 + error handler ──────────────────────────────────────────────────────
 app.use((req, res) => res.status(404).render('404', { title: 'Not found' }));

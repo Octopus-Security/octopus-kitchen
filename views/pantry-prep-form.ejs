@@ -1,0 +1,45 @@
+<%- include('partials/head', { title, asset }) %>
+<%- include('partials/nav', { user, isReviewer }) %>
+<% function at(k, i) { var v = form[k]; if (v && typeof v === 'object') return v[i] == null ? '' : v[i]; return i === 0 && v != null ? v : ''; } %>
+
+  <div class="hero-title">
+    <h1>New prep</h1>
+    <p>A shake or a batch of meals made from your pantry. It keeps as long as its soonest ingredient. An unopened ingredient counts as opened on the day you made this.</p>
+  </div>
+
+  <% if (error) { %><p class="form-error" role="alert"><%= error %></p><% } %>
+  <% if (!items.length) { %><p class="muted">Your pantry is empty. <a href="/pantry/new">Add food first</a>.</p><% } %>
+
+  <form class="recipe-form" method="post" action="/pantry/preps">
+    <label>Name <input name="name" required maxlength="120" value="<%= form.name || '' %>" placeholder="Morning shake" autocomplete="off"></label>
+    <label>Kind
+      <select name="category">
+        <option value="leftovers" <% if (form.category !== 'shake') { %>selected<% } %>>Meal prep or leftovers</option>
+        <option value="shake" <% if (form.category === 'shake') { %>selected<% } %>>Shake or smoothie</option>
+      </select>
+    </label>
+    <div class="two-up">
+      <label>Made <input type="date" name="madeOn" required max="<%= today %>" value="<%= form.madeOn || '' %>"></label>
+      <label>Portions <input type="number" name="portions" required min="1" max="50" inputmode="numeric" value="<%= form.portions || 1 %>"></label>
+    </div>
+
+    <h2>Ingredients, for the whole batch</h2>
+    <p class="muted">Servings means the label's servings: if the label says 1 scoop and the batch takes 2, that is 2.</p>
+    <% for (var n = 0; n < rows; n++) { %>
+      <fieldset class="prep-row">
+        <legend class="muted">Ingredient <%= n + 1 %></legend>
+        <select name="itemId" aria-label="Ingredient <%= n + 1 %>">
+          <option value="">(none)</option>
+          <% items.forEach(function (i) { %><option value="<%= i.id %>" <% if (String(at('itemId', n)) === String(i.id)) { %>selected<% } %>><%= [i.brand, i.name].filter(Boolean).join(' ') %><%= i.servingSize ? ' (' + i.servingSize + ')' : '' %></option><% }); %>
+        </select>
+        <div class="two-up">
+          <input name="itemServings" type="number" step="any" min="0" inputmode="decimal" placeholder="Servings" aria-label="Servings" value="<%= at('itemServings', n) %>">
+          <input name="itemAmount" maxlength="40" placeholder="Amount, like 2 scoops" aria-label="Amount" value="<%= at('itemAmount', n) %>">
+        </div>
+      </fieldset>
+    <% } %>
+    <label>Notes <textarea name="notes" rows="3" maxlength="1000"><%= form.notes || '' %></textarea></label>
+    <button type="submit">Save prep</button>
+  </form>
+
+<%- include('partials/foot', { hasAffiliate }) %>
