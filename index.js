@@ -11,7 +11,8 @@ const { allTemps, relevantTemps } = require('./safe-temps');
 const { relevantTools } = require('./kitchen-tools');
 const { withTag, amazonSearch, AMAZON_TAG } = require('./amazon');
 const { recipeToText, recipeFilename, parseIngredients } = require('./recipe-text');
-const { createFromBody, toggleRow, reviewRow, publishDecision } = require('./lib/recipe-review');
+const { createServiceRecipes } = require('./routes/service-recipes');
+const { createFromBody, toggleRow, reviewRow } = require('./lib/recipe-review');
 const {
   ownerOf, publicWhere, visibleWhere, ownedWhere, canView, canEdit, isReviewer,
 } = require('./ownership');
@@ -135,6 +136,9 @@ function requireServiceToken(req, res, next) {
   }
   return res.status(401).json({ ok: false, error: 'service token required' });
 }
+
+// ── Service API (the assistant): routes/service-recipes.js ───────────────────
+app.use(createServiceRecipes({ Recipe, requireServiceToken }));
 
 // ── Recipe presentation ────────────────────────────────────────────────────────
 function recipeCard(r) {
@@ -266,38 +270,6 @@ app.post('/review/:id(\\d+)', async (req, res, next) => {
 });
 
 app.get('/login', (req, res) => res.redirect(`${AUTH_PUBLIC_URL}/login`));
-
-// ── Service API (cortex / Neith) ─────────────────────────────────────────────
-app.get('/api/recipes', requireServiceToken, async (req, res) => {
-  const recipes = await Recipe.findAll({ where: ownedWhere(req), order: [['title', 'ASC']] });
-  res.json({ ok: true, recipes: recipes.map(recipeCard) });
-});
-
-app.get('/api/recipes/:id', requireServiceToken, async (req, res) => {
-  const r = await Recipe.findByPk(req.params.id);
-  if (!r || !canView(req, r)) return res.status(404).json({ ok: false });
-  res.json({ ok: true, recipe: { ...recipeCard(r), ingredients: parseIngredients(r), instructions: r.instructions } });
-});
-
-app.post('/api/recipes', requireServiceToken, async (req, res) => {
-  const b = req.body || {};
-  if (!b.title || !b.ingredients) return res.status(400).json({ ok: false, error: 'title and ingredients required' });
-  const askedPublic = b.visibility === 'public' || b.requestPublication === true;
-  const access = publishDecision({ isReviewer: isReviewer(req), requestPublic: askedPublic });
-  const r = await Recipe.create({
-    title: b.title,
-    servings: b.servings || 1,
-    ingredients: typeof b.ingredients === 'string' ? b.ingredients : JSON.stringify(b.ingredients),
-    instructions: Array.isArray(b.instructions) ? b.instructions.join('\n') : (b.instructions || ''),
-    keepsForDays: b.keepsForDays || 0,
-    tags: b.tags || '',
-    source: b.source || 'text',
-    owner: ownerOf(req),
-    visibility: access.visibility,
-    reviewStatus: access.reviewStatus,
-  });
-  res.status(201).json({ ok: true, id: r.id });
-});
 
 // ── Pantry: food dating, preps, GET /api/service/pantry/expiring ────────────
 app.use(createPantryRouter({ models: pantryModels, ownerOf, requireLogin, requireServiceToken, isPublicHost }));
