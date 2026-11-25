@@ -1454,6 +1454,30 @@ const RECIPES = [
       'Notes: wear gloves or use a silicone brush for the wash, keep it off the cheese area, and do not let it pool (it is alkaline and can irritate skin). This dough is stickier (higher hydration, about 75%) than the Soft pretzels (classic) master dough, on purpose: it stretches into a pizza base. Leftover dough: shape it into pretzels with the technique in Soft pretzels (classic); see also Pretzel buns and Pretzel bites. Best the same day; reheat slices at 175°C / 350°F for 8-10 minutes.',
     ].join('\n'),
   },
+
+  {
+    title: 'Chinese sugar donuts (buffet style)',
+    servings: 8, keepsForDays: 1,
+    prepMinutes: 10, cookMinutes: 15,
+    tags: 'chinese,buffet,donut,doughnut,dessert,sweet,fried',
+    ingredients: [
+      ing('refrigerated biscuit dough (8 large biscuits)', 1, 'can (about 16 oz)'),
+      ing('neutral oil (canola, peanut or vegetable), for frying', 'enough for 2 in deep', ''),
+      ing('granulated sugar', '¾', 'cup'),
+      ing('salt', 1, 'pinch'),
+    ],
+    instructions: [
+      '1. Mix the sugar and salt in a wide bowl. Set a wire rack or paper towels on a tray.',
+      '2. Pour the oil 2 in deep into a heavy pot, filling it no more than halfway. Heat to 350°F (175°C) and check with a thermometer.',
+      '3. Open the biscuits and leave them whole, or halve them for smaller donuts. Pat off any moisture; do not flatten them.',
+      '4. Lower in 2-3 at a time. Fry about 1½-2 minutes per side until deep golden, turning once. Let the oil return to 350°F between batches.',
+      '5. Cut one open to check that there is no raw dough in the middle. If there is, lower the heat to 335-340°F (168-171°C) and fry a little longer.',
+      '6. Drain for 20-30 seconds, then roll in the sugar while still hot so that it sticks.',
+      '7. Eat warm. To re-crisp, use an air fryer or oven at 325°F (165°C) for 3-4 minutes, then roll in fresh sugar.',
+      '',
+      'Notes: never leave hot oil unattended, keep water away from it, and if it smokes turn off the heat. Let the donuts cool a little before biting. Not test-cooked yet: times vary with biscuit size. Best the same day.',
+    ].join('\n'),
+  },
 ];
 
 // ── Seed function ─────────────────────────────────────────────────────────────
