@@ -85,7 +85,7 @@
     recipeInstructions: steps.map(function (s) { return { '@type': 'HowToStep', text: s.replace(/^\d+\.\s*/, '') }; }),
     keywords: recipe.tags || undefined,
     author: { '@type': 'Person', name: 'Serpopard' }
-  }) %>
+  }).replace(/</g, '\\u003c') %>
   </script>
 
 <%- include('partials/foot', { hasAffiliate }) %>
